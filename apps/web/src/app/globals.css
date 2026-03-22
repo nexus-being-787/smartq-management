@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: #1A9E72;
+    --brand-light: #E8F5F0;
+    --urgent: #EF4444;
+    --priority: #F59E0B;
+    --surface: #F8FAFB;
+    --border: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    color: var(--text-primary);
+    background: var(--surface);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-medium px-6 py-3 rounded-xl
+           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg
+           transition-all duration-200;
+  }
+
+  .badge-emergency {
+    @apply bg-red-50 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full border border-red-200;
+  }
+
+  .badge-priority {
+    @apply bg-amber-50 text-amber-600 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-200;
+  }
+
+  .badge-regular {
+    @apply bg-slate-50 text-slate-600 text-xs font-semibold px-2 py-0.5 rounded-full border border-slate-200;
+  }
+
+  .status-dot {
+    @apply inline-block w-2 h-2 rounded-full;
+  }
+
+  .token-number {
+    @apply font-bold tabular-nums tracking-tight;
+  }
+}
+
+/* Kiosk-specific: large touch targets */
+.kiosk-btn {
+  min-height: 80px;
+  font-size: 1.25rem;
+  touch-action: manipulation;
+}
+
+/* Display board: large TV-optimized text */
+.display-token {
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
