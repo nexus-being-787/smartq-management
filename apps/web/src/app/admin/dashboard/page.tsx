@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Department, Doctor } from '@smartq/types';
+import { io } from 'socket.io-client';
+
+const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -20,7 +23,7 @@ const MOCK_DOCTORS: Doctor[] = [
   { id: 'd4', name: 'Dr. Aruna Pillai', specialization: 'Paediatrics', departmentId: 'peds', status: 'AVAILABLE', todayServed: 22, todayPending: 9, averageConsultMinutes: 7 },
 ];
 
-const ACTIVITY_LOG = [
+const INITIAL_ACTIVITY_LOG = [
   { id: 5, time: '14:33', action: 'Emergency token issued — Cardiology', actor: 'Receptionist', type: 'error' },
   { id: 1, time: '14:32', action: 'Token GM042 marked CONSULTED', actor: 'Dr. Priya Nair', type: 'success' },
   { id: 2, time: '14:29', action: 'Overflow mode activated — Paediatrics', actor: 'Admin', type: 'warning' },
@@ -251,7 +254,7 @@ export default function AdminDashboard() {
                 <h2 className="font-semibold text-slate-800 text-sm">Activity log</h2>
               </div>
               <div className="divide-y divide-slate-50 max-h-64 overflow-y-auto">
-                {ACTIVITY_LOG.map(log => (
+                {activityLog.map(log => (
                   <div key={log.id} className="px-4 py-2.5">
                     <div className="flex items-start gap-2">
                       <span className={`text-xs mt-0.5 ${

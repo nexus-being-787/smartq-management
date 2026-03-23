@@ -20,9 +20,10 @@ async function seed() {
       CREATE TABLE IF NOT EXISTS staff_users (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
         employee_id TEXT UNIQUE NOT NULL,
         role TEXT NOT NULL,
-        password_hash TEXT NOT NULL,
         department_id TEXT,
         is_active BOOLEAN DEFAULT 1,
         last_login DATETIME
@@ -103,11 +104,10 @@ async function seed() {
     }
 
     // Seed Staff
-    const hashedPassword = bcrypt.hashSync('password123', 10);
     await db.run(`
-      INSERT OR IGNORE INTO staff_users (id, name, employee_id, role, password_hash, department_id)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, ['staff-admin', 'System Admin', 'EMP001', 'ADMIN', hashedPassword, null]);
+      INSERT OR IGNORE INTO staff_users (id, name, email, password, employee_id, role, department_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, ['staff-admin', 'System Admin', 'admin@smartq.com', 'password123', 'EMP001', 'ADMIN', null]);
 
     // Seed Patients
     const patients = [
