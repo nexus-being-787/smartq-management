@@ -75,6 +75,17 @@ function QueueBar({ length, max }: { length: number; max: number }) {
 export default function AdminDashboard() {
   const [depts, setDepts] = useState(MOCK_DEPARTMENTS);
   const [pausedDepts, setPausedDepts] = useState<Set<string>>(new Set());
+  const [activityLog, setActivityLog] = useState(INITIAL_ACTIVITY_LOG);
+
+  useEffect(() => {
+    socket.on('activity', (newLog) => {
+      setActivityLog(prev => [newLog, ...prev.slice(0, 19)]); // Keep latest 20
+    });
+
+    return () => {
+      socket.off('activity');
+    };
+  }, []);
 
   const totalInQueue = depts.reduce((s, d) => s + d.currentQueueLength, 0);
   const activeDoctors = MOCK_DOCTORS.filter(d => d.status !== 'ABSENT').length;
