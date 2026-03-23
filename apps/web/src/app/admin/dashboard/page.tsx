@@ -21,11 +21,11 @@ const MOCK_DOCTORS: Doctor[] = [
 ];
 
 const ACTIVITY_LOG = [
+  { id: 5, time: '14:33', action: 'Emergency token issued — Cardiology', actor: 'Receptionist', type: 'error' },
   { id: 1, time: '14:32', action: 'Token GM042 marked CONSULTED', actor: 'Dr. Priya Nair', type: 'success' },
   { id: 2, time: '14:29', action: 'Overflow mode activated — Paediatrics', actor: 'Admin', type: 'warning' },
   { id: 3, time: '14:21', action: 'Token OR038 — NO SHOW (2nd)', actor: 'System', type: 'error' },
   { id: 4, time: '14:15', action: 'Dr. Seetha started break', actor: 'Dr. Seetha', type: 'info' },
-  { id: 5, time: '14:01', action: 'Emergency token issued — Cardiology', actor: 'Receptionist', type: 'error' },
   { id: 6, time: '13:55', action: 'SMS broadcast sent to 9 patients', actor: 'System', type: 'info' },
 ];
 
