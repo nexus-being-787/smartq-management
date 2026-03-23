@@ -12,9 +12,9 @@ function mapToken(row: any): Token {
     doctorId: row.doctor_id,
     status: row.status as TokenStatus,
     priority: row.priority as TokenPriority,
-    issuedAt: row.issued_at.toISOString(),
-    calledAt: row.called_at?.toISOString(),
-    consultedAt: row.consulted_at?.toISOString(),
+    issuedAt: typeof row.issued_at === 'string' ? row.issued_at : row.issued_at?.toISOString(),
+    calledAt: typeof row.called_at === 'string' ? row.called_at : row.called_at?.toISOString(),
+    consultedAt: typeof row.consulted_at === 'string' ? row.consulted_at : row.consulted_at?.toISOString(),
     noShowCount: row.no_show_count,
     estimatedWaitMinutes: 0, // Calculated below
     queuePosition: 0, // Calculated below
@@ -32,11 +32,11 @@ export const issueToken = async (payload: {
   const deptCode = deptRes.rows[0]?.code || 'Q';
 
   const countRes = await query(
-    `SELECT COUNT(*) FROM tokens 
-     WHERE department_id = $1 AND issued_at >= CURRENT_DATE`,
+    `SELECT COUNT(*) as count FROM tokens 
+     WHERE department_id = $1 AND date(issued_at) = date('now')`,
     [payload.departmentId]
   );
-  const nextNumber = parseInt(countRes.rows[0].count) + 1;
+  const nextNumber = (countRes.rows[0]?.count || 0) + 1;
   const displayNumber = `${deptCode}-${nextNumber.toString().padStart(3, '0')}`;
 
   const priority = classifyPriority({
@@ -58,7 +58,7 @@ export const getQueueForDepartment = async (departmentId: string): Promise<Token
   const result = await query(
     `SELECT * FROM tokens 
      WHERE department_id = $1 AND (status = 'ISSUED' OR status = 'CALLED') 
-     AND issued_at >= CURRENT_DATE 
+     AND date(issued_at) = date('now') 
      ORDER BY issued_at ASC`,
     [departmentId]
   );
