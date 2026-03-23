@@ -4,6 +4,5 @@
   publish = "apps/web/.next"
 
 [build.environment]
-  NODE_ENV = "production"
   # Ensures Netlify uses the correct Node version
   NODE_VERSION = "20"
