@@ -80,8 +80,8 @@ export const updateTokenStatus = async (
 ): Promise<Token | null> => {
   const result = await query(
     `UPDATE tokens SET status = $1, 
-     called_at = CASE WHEN $1 = 'CALLED' THEN now() ELSE called_at END,
-     consulted_at = CASE WHEN $1 = 'IN_CONSULTATION' THEN now() ELSE consulted_at END
+     called_at = CASE WHEN $1 = 'CALLED' THEN datetime('now') ELSE called_at END,
+     consulted_at = CASE WHEN $1 = 'IN_CONSULTATION' THEN datetime('now') ELSE consulted_at END
      WHERE id = $2 RETURNING *`,
     [status, id]
   );

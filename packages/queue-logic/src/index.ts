@@ -52,28 +52,39 @@ export function classifyPriority(flags: PatientFlags): TokenPriority {
 // ─── Queue sort (the interleave engine) ──────────────────────────────────────
 
 export function sortQueue(tokens: Token[]): Token[] {
-  const emergency = tokens.filter(t => t.priority === 'EMERGENCY' && t.status === 'ISSUED');
-  const priority  = tokens.filter(t => t.priority === 'PRIORITY'  && t.status === 'ISSUED');
-  const regular   = tokens.filter(t => t.priority === 'REGULAR'   && t.status === 'ISSUED');
+  // 1. Separate tokens by status
+  const called    = tokens.filter(t => t.status === 'CALLED');
+  const issued    = tokens.filter(t => t.status === 'ISSUED');
+  
+  // 2. Further separate issued tokens by priority
+  const emergency = issued.filter(t => t.priority === 'EMERGENCY');
+  const priority  = issued.filter(t => t.priority === 'PRIORITY');
+  const regular   = issued.filter(t => t.priority === 'REGULAR');
 
-  // Sort each bucket by issuedAt (FIFO)
+  // 3. Sort each bucket by issuedAt (FIFO)
   const byTime = (a: Token, b: Token) =>
     new Date(a.issuedAt).getTime() - new Date(b.issuedAt).getTime();
 
+  called.sort(byTime); // Called tokens also sorted by when they were issued/called if multiple
   emergency.sort(byTime);
   priority.sort(byTime);
   regular.sort(byTime);
 
-  // Interleave: all emergency first, then 2:1 priority:regular
-  const result: Token[] = [...emergency];
+  // 4. Assemble the final queue
+  // All CALLED tokens first (they are already at the counter/room)
+  const result: Token[] = [...called];
+  
+  // Followed by all EMERGENCY tokens (they jump the line)
+  result.push(...emergency);
 
+  // Then interleave PRIORITY and REGULAR (e.g. 2:1 ratio)
   let pi = 0, ri = 0;
   while (pi < priority.length || ri < regular.length) {
-    // Serve 2 priority
+    // Serve PRIORITY tokens (up to ratio)
     for (let i = 0; i < DEFAULT_INTERLEAVE_RATIO.PRIORITY && pi < priority.length; i++) {
       result.push(priority[pi++]);
     }
-    // Serve 1 regular
+    // Serve 1 REGULAR token
     if (ri < regular.length) {
       result.push(regular[ri++]);
     }
