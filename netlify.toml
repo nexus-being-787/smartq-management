@@ -1,6 +1,6 @@
 [build]
-  # Build from the root so turbo can find and build workspace dependencies
-  command = "npm run build --filter=web"
+  # Use npx to ensure turbo binary is found in the CI path
+  command = "npx turbo run build --filter=web"
   publish = "apps/web/.next"
 
 [build.environment]
