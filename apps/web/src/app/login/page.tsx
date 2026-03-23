@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmail, getStaffRole } from '@/lib/supabase';
 
 const ROLE_ROUTES: Record<string, string> = {
   ADMIN: '/admin/dashboard',
@@ -28,39 +27,46 @@ export default function LoginPage() {
       return;
     }
 
-    // Step 1: Sign in with Supabase
-    const { session, error: authError } = await signInWithEmail(email, password);
-    if (authError || !session) {
-      setError(authError ?? 'Sign in failed. Please check your credentials.');
+    try {
+      // Authenticate against our PostgreSQL-backed API
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Sign in failed. Please check your credentials.');
+        setLoading(false);
+        return;
+      }
+
+      const { user, token } = data;
+
+      // Store session token and basic user info for subsequent API calls
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('sb_user_id', user.id);
+        sessionStorage.setItem('sb_role', user.role);
+        sessionStorage.setItem('sb_email', user.email);
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      // Redirect based on role
+      const route = ROLE_ROUTES[user.role];
+      if (!route) {
+        setError(`Unknown role "${user.role}". Contact your administrator.`);
+        setLoading(false);
+        return;
+      }
+
+      router.push(route);
+    } catch (err) {
+      setError('Network error — please check your connection.');
       setLoading(false);
-      return;
     }
-
-    // Step 2: Fetch staff role from staff_users table
-    const { role, error: roleError } = await getStaffRole(session.user.id, session.access_token);
-    if (roleError || !role) {
-      setError(roleError ?? 'Could not determine your staff role.');
-      setLoading(false);
-      return;
-    }
-
-    // Step 3: Store session token for subsequent API calls
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('sb_access_token', session.access_token);
-      sessionStorage.setItem('sb_user_id', session.user.id);
-      sessionStorage.setItem('sb_role', role);
-      sessionStorage.setItem('sb_email', session.user.email);
-    }
-
-    // Step 4: Redirect based on role
-    const route = ROLE_ROUTES[role];
-    if (!route) {
-      setError(`Unknown role "${role}". Contact your administrator.`);
-      setLoading(false);
-      return;
-    }
-
-    router.push(route);
   }
 
   return (

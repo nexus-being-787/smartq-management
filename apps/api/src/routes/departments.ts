@@ -1,9 +1,25 @@
 import { Router } from 'express';
+import { getAllDepartments, getDepartmentById } from '../services/department.service';
+
 const router = Router();
-// TODO: implement routes — connect to PostgreSQL + Redis services
-// See @smartq/api-client/src/index.ts for all expected endpoints
-router.get('/', (_req, res) => res.json([]));
-router.post('/', (_req, res) => res.json({ id: 'new', ...(_req.body) }));
-router.get('/:id', (req, res) => res.json({ id: req.params.id }));
-router.patch('/:id', (req, res) => res.json({ id: req.params.id, ...(req.body) }));
+
+router.get('/', async (_req, res) => {
+  try {
+    const departments = await getAllDepartments();
+    res.json(departments);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch departments' });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const department = await getDepartmentById(req.params.id);
+    if (!department) return res.status(404).json({ error: 'Department not found' });
+    res.json(department);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch department' });
+  }
+});
+
 export default router;

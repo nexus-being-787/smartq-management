@@ -1,9 +1,19 @@
 import { Router } from 'express';
+import { getQueueForDepartment } from '../services/token.service';
+
 const router = Router();
-// TODO: implement routes — connect to PostgreSQL + Redis services
-// See @smartq/api-client/src/index.ts for all expected endpoints
-router.get('/', (_req, res) => res.json([]));
-router.post('/', (_req, res) => res.json({ id: 'new', ...(_req.body) }));
-router.get('/:id', (req, res) => res.json({ id: req.params.id }));
-router.patch('/:id', (req, res) => res.json({ id: req.params.id, ...(req.body) }));
+
+router.get('/:departmentId', async (req, res) => {
+  try {
+    const tokens = await getQueueForDepartment(req.params.departmentId);
+    res.json({
+      tokens,
+      isPaused: false, // TODO: store in Redis/DB
+      isOverflowMode: false,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch queue state' });
+  }
+});
+
 export default router;

@@ -1,9 +1,16 @@
 import { Router } from 'express';
+import { getDailyStats } from '../services/analytics.service';
+
 const router = Router();
-// TODO: implement routes — connect to PostgreSQL + Redis services
-// See @smartq/api-client/src/index.ts for all expected endpoints
-router.get('/', (_req, res) => res.json([]));
-router.post('/', (_req, res) => res.json({ id: 'new', ...(_req.body) }));
-router.get('/:id', (req, res) => res.json({ id: req.params.id }));
-router.patch('/:id', (req, res) => res.json({ id: req.params.id, ...(req.body) }));
+
+router.get('/daily', async (req, res) => {
+  try {
+    const { date } = req.query;
+    const stats = await getDailyStats((date as string) || new Date().toISOString().split('T')[0]);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
 export default router;

@@ -1,9 +1,30 @@
 import { Router } from 'express';
+import { issueToken, updateTokenStatus, getQueueForDepartment } from '../services/token.service';
+
 const router = Router();
-// TODO: implement routes — connect to PostgreSQL + Redis services
-// See @smartq/api-client/src/index.ts for all expected endpoints
-router.get('/', (_req, res) => res.json([]));
-router.post('/', (_req, res) => res.json({ id: 'new', ...(_req.body) }));
-router.get('/:id', (req, res) => res.json({ id: req.params.id }));
-router.patch('/:id', (req, res) => res.json({ id: req.params.id, ...(req.body) }));
+
+router.post('/', async (req, res) => {
+  try {
+    const token = await issueToken(req.body);
+    res.status(201).json(token);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to issue token' });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  // TODO: implement getById
+  res.status(501).json({ error: 'Not implemented' });
+});
+
+router.patch('/:id/status', async (req, res) => {
+  try {
+    const token = await updateTokenStatus(req.params.id, req.body.status);
+    if (!token) return res.status(404).json({ error: 'Token not found' });
+    res.json(token);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update token status' });
+  }
+});
+
 export default router;
